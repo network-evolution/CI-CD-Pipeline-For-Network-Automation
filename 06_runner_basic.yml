@@ -1,0 +1,12 @@
+stages:          # List of stages for jobs, and their order of execution
+  - runner_job
+
+command-job:       # This job runs in the build stage, which runs first.
+  stage: runner_job
+  tags:
+    - tower2-local
+
+  script:
+    - pwd
+    - whoami
+    - hostname

@@ -1,0 +1,63 @@
+---
+- name: Initial Playbook
+  hosts: R2
+  connection: local
+  gather_facts: true
+  tasks:  
+
+##### Setup Manufacturer #######
+  - debug:
+      var: ansible_facts
+  - name: "TASK 100: NETBOX >> ADD DEVICE TO NETBOX"
+    netbox.netbox.netbox_device:
+      netbox_url: "{{ netbox_url }}"
+      netbox_token: "{{ netbox_token }}"
+      validate_certs: false
+      data:
+        name: "{{ inventory_hostname }}"
+        device_type: "{{ ansible_facts['net_model'] }}"
+        platform: IOS  # May be able to use a filter to define in future
+        serial: "{{ ansible_facts['net_serialnum'] }}"
+        status: Active
+        device_role: prod_routers
+        site: NYC_PROD
+#        custom_fields:
+#          code_version: "{{ ansible_facts['net_version'] }}"
+
+  - name: "TASK 110: NETBOX >> ADD INTERFACES TO NETBOX"
+    netbox.netbox.netbox_device_interface:
+      netbox_url: "{{ netbox_url }}"
+      netbox_token: "{{ netbox_token }}"
+      validate_certs: false
+      data:
+        device: "{{ inventory_hostname }}"
+        name: "{{ item.key }}" # GigabitEthernet0/0
+        type: 1000BASE-T
+#        form_factor: "{{ item.key | get_interface_type }}"  # Define types
+        mac_address: "{{ item.value.macaddress | ansible.netcommon.hwaddr }}"
+      state: present
+    with_dict:
+      - "{{ ansible_facts['net_interfaces'] }}"
+
+    ##### Interface #######
+
+  - name: "TASK 210: NETBOX >> ADD IP ADDRESS OF ANSIBLE HOST"
+    netbox.netbox.netbox_ip_address:
+      netbox_url: "{{ netbox_url }}"
+      netbox_token: "{{ netbox_token }}"
+      validate_certs: false
+      data:
+        family: 4
+        address: "{{ ansible_host }}/24"
+        status: active
+        interface:
+          name: GigabitEthernet0/0
+          device: "{{ inventory_hostname }}"
+      state: present
+
+
+
+
+
+       
+       

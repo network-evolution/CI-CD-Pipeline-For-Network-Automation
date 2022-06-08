@@ -1,0 +1,7 @@
+01
+https://galaxy.ansible.com/
+
+
+
+ansible-inventory -v --list -i netbox_test.yml
+

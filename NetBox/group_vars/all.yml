@@ -1,0 +1,44 @@
+---
+netbox_url: https://192.168.0.82
+netbox_token: bb5ae3f2b41ab0cde15d434a6308651629b47cb5
+netbox_state: present
+device: router_61
+device_role: prod_routers
+site: prod_dc011
+status: active
+
+### Site List #####
+site_list:
+  - name: NYC_PROD
+    time_zone: America/New_York
+    status: Active
+  - name: NYC_STAGE
+    time_zone: America/New_York
+    status: Active
+
+### Manufacturers #####
+manufacturers:
+  - Arista
+  - Cisco
+  
+### Device Type ####
+device_types:
+  - model: “CSR1000v”
+    manufacturer: “Cisco”
+    slug: “csr1000v”
+    part_number: “csr1000v”
+    full_depth: False
+  - model: “vEOS”
+    manufacturer: “Arista”
+    slug: “veos”
+    part_number: “veos”
+    full_depth: False
+
+### Platofrom ####
+platforms:
+  - name: “EOS”
+    slug: “eos”
+  - name: “IOS”
+    slug: “ios”
+
+

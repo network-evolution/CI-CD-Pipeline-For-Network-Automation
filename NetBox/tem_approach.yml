@@ -1,0 +1,87 @@
+---
+- name: Initial Playbook
+  hosts: R1
+  connection: local
+  gather_facts: true
+  tasks:
+
+    ##### Setup Manufacturer #######
+    - debug:
+        var: ansible_facts
+    - name: "TASK 100: NETBOX >> ADD DEVICE TO NETBOX"
+      netbox.netbox.netbox_device:
+        netbox_url: "{{ netbox_url }}"
+        netbox_token: "{{ netbox_token }}"
+        validate_certs: false
+        data:
+          name: "{{ inventory_hostname }}"
+          device_type: "{{ ansible_facts['net_model'] }}"
+          platform: IOS  # May be able to use a filter to define in future
+          serial: "{{ ansible_facts['net_serialnum'] }}"
+          status: Active
+          device_role: stage_routers
+          site: NYC_STAGE
+    #        custom_fields:
+    #          code_version: "{{ ansible_facts['net_version'] }}"
+
+    - name: "TASK 110: NETBOX >> ADD INTERFACES TO NETBOX"
+      netbox.netbox.netbox_device_interface:
+        netbox_url: "{{ netbox_url }}"
+        netbox_token: "{{ netbox_token }}"
+        validate_certs: false
+        data:
+          device: "{{ inventory_hostname }}"
+          name: "{{ item.key }}" # GigabitEthernet0/0
+          type: 1000BASE-T
+          #        form_factor: "{{ item.key | get_interface_type }}"  # Define types
+          mac_address: "{{ item.value.macaddress | ansible.netcommon.hwaddr }}"
+        state: present
+      with_dict:
+        - "{{ ansible_facts['net_interfaces'] }}"
+
+
+    - name: "TASK 200: NETBOX >> Add temporary interface"
+      netbox.netbox.netbox_device_interface:
+          netbox_url: "{{ netbox_url }}"
+          netbox_token: "{{ netbox_token }}"
+          validate_certs: false
+          data:
+            device: "{{ inventory_hostname }}"
+            name: Temporary_Interface
+            form_factor: Virtual
+          state: present
+      ##### Add IP Address #######
+    - name: "TASK 210: NETBOX >> ADD IP ADDRESS OF ANSIBLE HOST"
+      netbox.netbox.netbox_ip_address:
+        netbox_url: "{{ netbox_url }}"
+        netbox_token: "{{ netbox_token }}"
+        validate_certs: false
+        data:
+          family: 4
+          address: "{{ ansible_host }}/24"
+          status: active
+          interface:
+            device: "{{ inventory_hostname }}"
+            name: Temporary_Interface
+
+
+    ######## Assign IP
+    - name: "TASK 220: NETBOX >> ASSOCIATE IP ADDRESS TO DEVICE"
+      netbox.netbox.netbox_device:
+        netbox_url: "{{ netbox_url }}"
+        netbox_token: "{{ netbox_token }}"
+        validate_certs: false
+        data:
+          name: "{{ inventory_hostname }}"
+          device_type: "{{ ansible_facts['net_model'] }}"
+          platform: IOS
+          serial: "{{ ansible_facts['net_serialnum'] }}"
+          status: Active
+          primary_ip4: "{{ ansible_host }}/24"
+
+
+
+
+
+
+

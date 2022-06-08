@@ -1,0 +1,64 @@
+---
+- name: Initial Playbook
+  hosts: localhost
+  connection: local
+  gather_facts: no
+  tasks:  
+###### Setup Site ###############
+   - name: TASK  SETUP SITES
+     netbox.netbox.netbox_site:
+       netbox_url: "{{ netbox_url }}"
+       netbox_token: "{{ netbox_token }}"
+       validate_certs: false
+       data: "{{ item }}"
+     loop: "{{ site_list }}"
+#
+
+##### Setup Manufacturer #######
+
+   - name: "TASK  SETUP Manufacturer"
+     netbox.netbox.netbox_manufacturer:
+       netbox_url: "{{ netbox_url }}"
+       netbox_token: "{{ netbox_token }}"
+       validate_certs: false
+       data:
+         name: "{{ manufacturer }}"
+     loop: "{{ manufacturers }}"
+     loop_control:
+       loop_var: manufacturer
+
+    ##### Satup Manufacturer #######
+
+   - name: "TASK  SETUP Device Type"
+     netbox.netbox.netbox_device_type:
+       netbox_url: "{{ netbox_url }}"
+       netbox_token: "{{ netbox_token }}"
+       validate_certs: false
+       data:
+         model: "{{device_type.model}}"
+         manufacturer: "{{ device_type.manufacturer }}"
+         slug: "{{ device_type.slug }}"
+         part_number: "{{ device_type.part_number }}"
+         is_full_depth: "{{ device_type.full_depth }}"
+     loop: "{{ device_types }}"
+     loop_control:
+       loop_var: device_type
+       label: "{{ device_type['model'] }}"
+
+########## Platform ################
+   - name: "TASK  SETUP Platform"
+     netbox.netbox.netbox_platform:
+        netbox_url: "{{ netbox_url }}"
+        netbox_token: "{{ netbox_token }}"
+        validate_certs: false
+        data:
+          name: "{{ platform.name }}"
+          slug: "{{ platform.slug }}"
+     loop: "{{ platforms }}"
+     loop_control:
+        loop_var: platform
+        label: "{{ platform['name'] }}"
+
+
+       
+       

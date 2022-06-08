@@ -1,0 +1,25 @@
+stages:          # List of stages for jobs, and their order of execution
+  - tower_template_execution
+
+tower-job-get-facts:       # This job runs in the build stage, which runs first.
+  when: on_success
+  only:
+    changes:
+      - 01_IOS_Facts.yml
+  tags:
+    - tower2-local
+  stage: tower_template_execution
+  script:
+    - tower-cli job launch --job-template=15 -v
+    - whoami
+
+tower-job-int-config:       # This job runs in the build stage, which runs first.
+  when: on_success
+  only:
+    changes:
+      - 05_ios_config.yml
+  tags:
+    - tower2-local
+  stage: tower_template_execution
+  script:
+    - tower-cli job launch --job-template=19 -v
